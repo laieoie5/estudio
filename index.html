@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <title>ESTÚDIO DA PRAÇA</title>
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<!-- LIGHTBOX GLOBAL -->
+<div id="lightbox" class="lightbox">
+  <span class="fechar" id="fechar-lightbox">&times;</span>
+  <button class="prev-img">&#10094;</button>
+  <img class="lightbox-img" id="lightbox-img">
+  <button class="next-img">&#10095;</button>
+</div>
+
+<!-- MODAL DE CONFIRMAÇÃO DE EXCLUSÃO -->
+<div id="modal-excluir" class="modal-overlay">
+  <div class="modal-box">
+    <p class="modal-texto">Excluir esta avaliação?</p>
+    <div class="auth-btns">
+      <button class="btn-auth" id="modal-confirmar">Excluir</button>
+      <button class="btn-auth btn-secondary" id="modal-cancelar">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+
+<body>
+
+<!-- SVG -->
+
+<svg xmlns="http://www.w3.org/2000/svg" style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true">
+  <defs>
+ 
+    <!-- yin-yang ☯ tatuadores -->
+    <symbol id="ic-yinyang" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.6" />
+      <path fill="currentColor" fill-rule="evenodd"
+        d="M12 3A9 9 0 0 1 12 21A4.5 4.5 0 0 1 12 12A4.5 4.5 0 0 0 12 3Z M10.7 16.5a1.3 1.3 0 1 0 2.6 0a1.3 1.3 0 1 0-2.6 0z" />
+      <circle cx="12" cy="7.5" r="1.3" fill="currentColor" />
+    </symbol>
+ 
+    <!-- cruz ♱  henripsy -->
+    <symbol id="ic-cruz" viewBox="0 0 24 24">
+      <path fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"
+        d="M12 2.5v19M7 8h10M10.5 2.5h3M10.5 21.5h3M7 6.5v3M17 6.5v3" />
+    </symbol>
+ 
+    <!-- lua  estrela ☪  aleatória arte -->
+    <symbol id="ic-lua" viewBox="0 0 24 24">
+      <path fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"
+        d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+      <path fill="currentColor" d="M16.5 5.2l.9 1.9 1.9.9-1.9.9-.9 1.9-.9-1.9-1.9-.9 1.9-.9z" />
+    </symbol>
+ 
+    <!-- flor  ❀ betty -->
+    <symbol id="ic-flor" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round">
+        <circle cx="12" cy="7.5" r="3" />
+        <circle cx="16.28" cy="10.61" r="3" />
+        <circle cx="14.65" cy="15.64" r="3" />
+        <circle cx="9.35" cy="15.64" r="3" />
+        <circle cx="7.72" cy="10.61" r="3" />
+      </g>
+      <circle cx="12" cy="12" r="1.5" fill="currentColor" />
+    </symbol>
+ 
+    <!-- ⚲ localizacao -->
+    <symbol id="ic-pin" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z" />
+        <circle cx="12" cy="10" r="3" />
+      </g>
+    </symbol>
+ 
+    <!-- Instagram -->
+    <symbol id="ic-instagram" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="3" width="18" height="18" rx="5" />
+        <circle cx="12" cy="12" r="4" />
+      </g>
+      <circle cx="17.5" cy="6.5" r="1.1" fill="currentColor" />
+    </symbol>
+ 
+    <!-- losango    ❖  -->
+    <symbol id="ic-losango" viewBox="0 0 12 12">
+      <path d="M6 1l5 5-5 5-5-5z" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round" />
+      <circle cx="6" cy="6" r="1.2" fill="currentColor" />
+    </symbol>
+ 
+  </defs>
+</svg>
+
+  
+  <script>
+    if (localStorage.getItem('tema') === 'dark') {
+      document.documentElement.classList.add('dark');
+    }
+  </script>
+
+
+<!-- CORPO DO SITE -->
+
+
+<nav class="navbar">
+
+  <!-- PC: esquerda (menu ☰) -->
+  <div class="nav-left">
+    <button class="menu-btn" id="menu-btn">☰</button>
+    <div class="dropdown" id="dropdown">
+      <a href="login.html" class="dropdown-link" id="menu-entrar">Entrar</a>
+      <a href="login.html#cadastro" class="dropdown-link" id="menu-cadastro">Criar conta</a>
+      <button type="button" class="dropdown-link" id="menu-sair" style="display:none;">Sair</button>
+
+      <div class="dropdown-tema">
+        <div class="trilho" id="trilho">
+          <div class="indicador"></div>
+        </div>
+        <span>Modo escuro/claro</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- PC: centro -->
+  <div class="nav-center">
+    <a href="#localizacao">Localização</a>
+    <a href="#tatuadores">Tatuadores</a>
+    <a href="#recentes">Trabalhos Recentes</a>
+    <a href="#avaliacoes">Avaliações</a>
+    <a href="#footer">Contato</a>
+  </div>
+
+  <!-- PC: direita (logo) -->
+  <div class="nav-right">
+    <a href="#">
+      <img src="logo-clara.png" class="logo-clara" alt="Logo">
+      <img src="logo-escura.png" class="logo-escura" alt="Logo">
+    </a>
+  </div>
+
+
+    <!-- MOBILE: barra fixa (☰ + logo + ícone user) -->
+    <div class="mobile-navbar">
+      <button class="mobile-menu-btn" id="mobile-menu-btn">☰</button>
+      <a href="#" class="mobile-logo">
+        <img src="logo-clara.png" class="logo-clara" alt="Logo">
+        <img src="logo-escura.png" class="logo-escura" alt="Logo">
+      </a>
+      <button class="mobile-user-btn" id="mobile-user-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="8" r="4" />
+          <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
+        </svg>
+      </button>
+    </div>
+
+    <div class="mobile-drawer" id="mobile-drawer">
+      <div class="mobile-drawer-inner">
+
+        <a href="#localizacao" class="drawer-link">
+          <img class="drawer-icon" src="arrow-up-right-svgrepo-com.svg" alt="">
+          Localização
+        </a>
+        <a href="#tatuadores" class="drawer-link">
+          <img class="drawer-icon" src="arrow-up-right-svgrepo-com.svg" alt="">
+          Tatuadores
+        </a>
+        <a href="#recentes" class="drawer-link">
+          <img class="drawer-icon" src="arrow-up-right-svgrepo-com.svg" alt="">
+          Trabalhos Recentes
+        </a>
+        <a href="#avaliacoes" class="drawer-link">
+          <img class="drawer-icon" src="arrow-up-right-svgrepo-com.svg" alt="">
+          Avaliações
+        </a>
+        <a href="#footer" class="drawer-link">
+          <img class="drawer-icon" src="arrow-up-right-svgrepo-com.svg" alt="">
+          Contato
+        </a>
+
+        <div class="drawer-tema">
+          <div class="trilho" id="trilho-mobile">
+            <div class="indicador"></div>
+          </div>
+          <span>Modo escuro/claro</span>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- MOBILE: gaveta lateral direita (user) -->
+    <div class="mobile-user-drawer" id="mobile-user-drawer">
+      <div class="mobile-drawer-inner">
+
+        <button class="drawer-link drawer-user-link" id="drawer-ir-login">
+          <img class="entrarsvg" src="arrow-up-right-svgrepo-com.svg" alt="">
+          Entrar
+        </button>
+
+        <button class="drawer-link drawer-user-link" id="drawer-ir-cadastro">
+          <img class="criarcontasvg" src="arrow-right-from-bracket-svgrepo-com.svg" alt="">
+          Criar Conta
+        </button>
+
+        <button class="drawer-link drawer-user-link" id="drawer-sair">
+          <img class="entrarsvg" src="exit-door-svgrepo-com.svg" alt="">
+          Sair
+        </button>
+
+      </div>
+    </div>
+
+    <!-- Overlay único compartilhado -->
+    <div class="mobile-drawer-overlay" id="mobile-drawer-overlay"></div>
+
+  </nav>
+
+  <br class="br"><br class="br"><br class="br"><br class="br"><br class="br"><br class="br">
+
+  <!-- CARROSSEL -->
+
+  <div class="carousel">
+    <div class="slides">
+
+      <!-- SLIDE 1 -->
+      <picture>
+        <source media="(min-width: 769px)" srcset="pcimg1.jpg">
+        <img src="img1.jpg" loading="lazy" alt="Slide 1">
+      </picture>
+      
+      <!-- SLIDE 2 -->
+      <picture>
+        <source media="(min-width: 769px)" srcset="pcimg2.jpg">
+        <img src="img2.jpg" loading="lazy" alt="Slide 2">
+      </picture>
+      
+      <!-- SLIDE 3 -->
+      <picture>
+        <source media="(min-width: 769px)" srcset="pcimg3.jpg">
+        <img src="img3.jpg" loading="lazy" alt="Slide 3">
+      </picture>
+    
+    </div>
+    <button class="prev">&#10094;</button>
+    <button class="next">&#10095;</button>
+    <div class="carousel-dots" id="carousel-dots"></div>
+  </div>
+
+  <br><br>
+
+<!-- SEÇÃO LOCALIZAÇÃO / CONHEÇA O ESPAÇO -->
+  <div class="container">
+    <div class="card" id="localizacao">
+      <section>
+        <h1 class="loc-h1">- Conheça o Espaço -</h1>
+        <h1 class="loc-h2">Conheça <br> o Espaço</h1>
+ 
+        <div class="esp-divisor reveal" aria-hidden="true"><span>❖</span></div>
+ 
+        <p class="tat-p esp-intro reveal">Um ambiente pensado pra sua experiência, do primeiro esboço à última hachura,
+          confira as imagens:</p>
+ 
+        <div class="esp-grid">
+ 
+          <!-- Galeria (a classe "galeria" mantém o lightbox funcionando) -->
+          <div class="esp-galeria galeria">
+            <figure class="reveal">
+              <img src="img1.png" loading="lazy" alt="Recepção do estúdio">
+              <figcaption>Recepção</figcaption>
+            </figure>
+            <figure class="reveal">
+              <img src="img2.png" loading="lazy" alt="Sala de tatuagem">
+              <figcaption>Sala de tatuagem</figcaption>
+            </figure>
+            <figure class="reveal">
+              <img src="img3.png" loading="lazy" alt="Recepção do estúdio">
+              <figcaption>Recepção</figcaption>
+            </figure>
+            <figure class="reveal">
+              <img src="img.png" loading="lazy" alt="Ambiente do estúdio">
+              <figcaption>Ambiente</figcaption>
+            </figure>
+          </div>
+ 
+          <!-- Cartão de endereço -->
+          <div class="esp-card reveal">
+            <div class="esp-foto">
+              <img src="fachada.jpeg" loading="lazy" alt="Fachada do estúdio">
+              <span class="esp-selo">Sala 305</span>
+            </div>
+ 
+            <div class="esp-corpo"> <br><br>
+              <h3 class="esp-titulo">⚲ Localização</h3>
+              <address class="esp-endereco">
+                Rua Silva Rabelo, 27 — Sala 305<br>
+                        Rio de Janeiro, RJ
+              </address>
+              <a href="https://maps.google.com/?q=Rua+Silva+Rabelo+27+Rio+de+Janeiro" target="_blank"
+                rel="noopener" class="instagram-btn esp-btn">
+                GOOGLE MAPS
+              </a>
+            </div>
+          </div>
+ 
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <br><br><br>
+
+
+<!-- TATUADORES -->
+
+
+<div class="container">
+  <div class="card" id="tatuadores">
+ 
+    <h1 class="tat-h1 tat-titulo">
+      <svg class="ic ic-titulo" aria-hidden="true"><use href="#ic-yinyang" /></svg>
+      Tatuadores
+      <svg class="ic ic-titulo" aria-hidden="true"><use href="#ic-yinyang" /></svg>
+    </h1>
+ 
+    
+
+    <!-- índice atalhos para cada artista -->
+    <nav class="tat-indice reveal" aria-label="Ir para um tatuador">
+      <a href="#henripsy"><svg class="ic" aria-hidden="true"><use href="#ic-cruz" /></svg>henripsy</a>
+      <a href="#aleatoria-arte"><svg class="ic" aria-hidden="true"><use href="#ic-lua" /></svg>Aleatória Arte</a>
+      <a href="#betty-tattoo"><svg class="ic" aria-hidden="true"><use href="#ic-flor" /></svg>Betty Tattoo</a>
+    </nav>
+ 
+    <br>
+
+    <!-- ================= HENRIPSY ================= -->
+    <article class="tat-card reveal" id="henripsy">
+ 
+      <div class="tat-capa">
+        <!-- foto de capa -->
+        <img src="henripsy.png" loading="lazy" alt="Tatuagem de henripsy">
+        <h2 class="tat-nome"><svg class="ic" aria-hidden="true"><use href="#ic-cruz" /></svg>henripsy</h2>
+      </div>
+ 
+      <div class="tat-conteudo">
+        <!-- tags do estilo -->
+        <ul class="tat-tags">
+          <li>Sketch</li>
+          <li>Hachura</li>
+          <li>Rastelados</li>
+          <li>Boldline</li>
+          <li>Fine line</li>
+        </ul>
+ 
+        <!-- Bio  -->
+        <p class="tat-bio">Há mais de 10 anos como tatuador e uma vida toda rabiscando esboços. O foco é o sketch:
+          linhas soltas e traços caóticos que simulam rascunho, levado para temas religiosos de umbanda e candomblé,
+          com desenhos únicos feitos exclusivamente para cada cliente.</p>
+ 
+        <h3 class="tat-sub">
+          <svg class="ic" aria-hidden="true"><use href="#ic-losango" /></svg>Trabalhos<svg class="ic"
+            aria-hidden="true"><use href="#ic-losango" /></svg>
+        </h3>
+ 
+        <!-- classe galeria -->
+        <div class="tat-galeria galeria" style="--cols:3">
+          <img src="trab1.png" loading="lazy" class="reveal" alt="Trabalho de henripsy">
+          <img src="trab2.png" loading="lazy" class="reveal" alt="Trabalho de henripsy">
+          <img src="trab3.png" loading="lazy" class="reveal" alt="Trabalho de henripsy">
+          <img src="trab4.png" loading="lazy" class="reveal" alt="Trabalho de henripsy">
+          <img src="trab5.png" loading="lazy" class="reveal" alt="Trabalho de henripsy">
+          <img src="trab6.png" loading="lazy" class="reveal" alt="Trabalho de henripsy">
+        </div>
+ 
+        <a class="tat-btn" href="https://www.instagram.com/henripsy/" target="_blank" rel="noopener">
+          <svg class="ic" aria-hidden="true"><use href="#ic-instagram" /></svg>@henripsy
+        </a>
+      </div>
+    </article>
+ 
+    <br><br>
+    <div class="esp-divisortattoo" aria-hidden="true"><span>❖</span></div>
+    <br><br><br>
+
+    <!-- ================= ALEATÓRIA ARTE ================= -->
+    <article class="tat-card tat-card--inverso reveal" id="aleatoria-arte">
+ 
+      <div class="tat-capa">
+        <!-- foto de capa -->
+        <img src="trab7.png" loading="lazy" alt="Tatuagem de Aleatória Arte">
+        <h2 class="tat-nome"><svg class="ic" aria-hidden="true"><use href="#ic-lua" /></svg>Aleatória Arte</h2>
+      </div>
+ 
+      <div class="tat-conteudo">
+        <ul class="tat-tags">
+          <li>Blackwork</li>
+          <li>Preto e cinza</li>
+          <li>Colorido</li>
+          <li>Pets</li>
+        </ul>
+ 
+        <p class="tat-bio">Há 5 anos na tatuagem e uma vida toda com arte. Do blackwork ao colorido, passando pelo
+          preto e cinza e por tatuagens de pets, sempre com peças personalizadas. O atendimento é focado nos detalhes,
+          na qualidade e na experiência, seja sua primeira tattoo ou mais uma na coleção.</p>
+ 
+        <h3 class="tat-sub">
+          <svg class="ic" aria-hidden="true"><use href="#ic-losango" /></svg>Trabalhos<svg class="ic"
+            aria-hidden="true"><use href="#ic-losango" /></svg>
+        </h3>
+ 
+        <div class="tat-galeria galeria" style="--cols:2">
+          <img src="trab7.png" loading="lazy" class="reveal" alt="Trabalho de Aleatória Arte">
+          <img src="trab8.png" loading="lazy" class="reveal" alt="Trabalho de Aleatória Arte">
+          <img src="trab9.png" loading="lazy" class="reveal" alt="Trabalho de Aleatória Arte">
+          <img src="trab10.png" loading="lazy" class="reveal" alt="Trabalho de Aleatória Arte">
+        </div>
+ 
+        <a class="tat-btn" href="https://www.instagram.com/aleatoriaartee" target="_blank" rel="noopener">
+          <svg class="ic" aria-hidden="true"><use href="#ic-instagram" /></svg>@aleatoriaartee
+        </a>
+      </div>
+    </article>
+ 
+ 
+    <br><br>
+    <div class="esp-divisortattoo" aria-hidden="true"><span>❖</span></div>
+    <br><br><br>
+
+
+    <!-- ================= BETTY TATTOO ================= -->
+    <article class="tat-card reveal" id="betty-tattoo">
+ 
+      <div class="tat-capa">
+        <!-- foto de capa -->
+        <img src="trab11.png" loading="lazy" alt="Tatuagem de Betty Tattoo">
+        <h2 class="tat-nome"><svg class="ic" aria-hidden="true"><use href="#ic-flor" /></svg>Betty Tattoo</h2>
+      </div>
+ 
+      <div class="tat-conteudo">
+        <!-- tags -->
+        <ul class="tat-tags">
+          <li>Desenhos únicos</li>
+          <li>Personalizado</li>
+          <li>Experiência tranquila</li>
+        </ul>
+ 
+        <p class="tat-bio">Tatuagem e arte transformando ideias em desenhos únicos e personalizados para cada cliente.
+          A busca é por uma tattoo que combine com a personalidade e a história de quem escolheu carregá-la, com
+          cuidado em cada detalhe, uma experiência tranquila e uma arte que você tenha orgulho de levar para a vida
+          toda.</p>
+ 
+        <h3 class="tat-sub">
+          <svg class="ic" aria-hidden="true"><use href="#ic-losango" /></svg>Trabalhos<svg class="ic"
+            aria-hidden="true"><use href="#ic-losango" /></svg>
+        </h3>
+ 
+        <div class="tat-galeria galeria" style="--cols:2">
+          <img src="trab11.png" loading="lazy" class="reveal" alt="Trabalho de Betty Tattoo">
+          <img src="trab12.png" loading="lazy" class="reveal" alt="Trabalho de Betty Tattoo">
+          <img src="trab20.png" loading="lazy" class="reveal" alt="Trabalho de Betty Tattoo">
+          <img src="trab21.png" loading="lazy" class="reveal" alt="Trabalho de Betty Tattoo">
+        </div>
+ 
+        <a class="tat-btn" href="https://www.instagram.com/betty.tattoo/" target="_blank" rel="noopener">
+          <svg class="ic" aria-hidden="true"><use href="#ic-instagram" /></svg>@betty.tattoo
+        </a>
+      </div>
+    </article>
+ 
+  </div>
+</div>
+  </div>
+
+
+
+  <br><br><br>
+
+
+
+  <div class="container container-pequeno">
+    <div class="card" id="recentes">
+      <section>
+        <h1 class="trabre-h1">-Trabalhos Recentes-</h1> <br>
+        <div class="galeria">
+          <img src="img7.png" loading="lazy" class="reveal">
+          <img src="img6.png" loading="lazy" class="reveal">
+          <img src="img12.png" loading="lazy" class="reveal">
+          <img src="img10.png" loading="lazy" class="reveal">
+          <img src="img11.png" loading="lazy" class="reveal">
+          <img src="img8.png" loading="lazy" class="reveal">
+          <img src="img9.png" loading="lazy" class="reveal">
+          <img src="img5.png" loading="lazy" class="reveal">
+          <img src="img4.png" loading="lazy" class="reveal">
+          <img src="img13.png" loading="lazy" class="reveal">
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <br><br>
+
+  <section class="video-estudio-section">
+
+
+    <div class="video-wrapper reveal">
+
+      <video class="video-estudio" autoplay muted loop playsinline>
+        <source src="video-estudio.mp4" type="video/mp4">
+      </video>
+
+      <div class="video-overlay">
+        <h3>Conheça Nosso Estúdio</h3>
+
+        <a href="https://instagram.com/henripsy" target="_blank" class="instagram-btn">
+          ▶ VER NO INSTAGRAM
+        </a>
+      </div>
+
+    </div>
+
+  </section>
+
+  <br><br><br>
+
+  <div class="container">
+    <div class="card" id="avaliacoes">
+      <section>
+        <h1 class="ava-h1">⛧𝓐valiações⛧</h1>
+        <h3>-O que nossos clientes dizem-</h3>
+        <div id="resumo-avaliacoes"></div>
+
+        <div id="auth-area">
+    <div id="login-box" class="auth-box"> <br>
+      <div class="auth-btns">
+        <a class="btn-auth" href="login.html">Entrar</a>
+        <a class="btn-auth btn-secondary" href="login.html#cadastro">Criar conta</a>
+      </div>
+    </div>
+
+    <div id="logado-box" class="auth-box" style="display:none;">
+      <p id="bem-vindo" class="bem-vindo"></p>
+      <button class="btn-auth btn-secondary" id="btn-sair">Sair</button>
+    </div>
+
+          <div id="cadastro-box" class="auth-box" style="display:none;">
+
+            <h3>Criar conta</h3>
+            <input type="text" id="cad-nome" placeholder="Seu nome" class="auth-input"> <br><br>
+            <input type="email" id="cad-email" placeholder="E-mail" class="auth-input"> <br><br>
+            <input type="password" id="cad-senha" placeholder="Senha (mín. 6 caracteres)" class="auth-input"> <br><br>
+            <div class="auth-btns"> <br>
+              <button class="btn-auth" id="btn-cadastrar">Cadastrar</button>
+              <button class="btn-auth btn-secondary" id="btn-ir-login">Já tenho conta</button>
+            </div>
+            <p id="cad-erro" class="auth-erro"></p>
+          </div>
+
+          <div id="logado-box" class="auth-box" style="display:none;">
+            <p id="bem-vindo" class="bem-vindo"></p>
+            <button class="btn-auth btn-secondary" id="btn-sair">Sair</button>
+          </div>
+        </div>
+
+        <div id="comentar-area" style="display:none;">
+          <textarea id="novo-comentario" class="comentario-input" placeholder="Escreva sua avaliação..."></textarea>
+          <div class="estrelas-input" id="estrelas-input">
+            <span class="estrela-sel" data-val="1">★</span>
+            <span class="estrela-sel" data-val="2">★</span>
+            <span class="estrela-sel" data-val="3">★</span>
+            <span class="estrela-sel" data-val="4">★</span>
+            <span class="estrela-sel" data-val="5">★</span>
+          </div>
+          <button class="btn-auth" id="btn-enviar-comentario">Publicar avaliação</button>
+        </div>
+
+        <div id="lista-avaliacoes" class="lista-avaliacoes"></div>
+        <p class="av-texto"></p>
+      </section>
+    </div>
+  </div>
+
+  <br><br><br>
+
+  <script src="script.js" type="module" defer></script>
+
+  <!-- FOOTER -->
+
+  <img src="bannerpretoebranco.png" class="banner" id="banner">
+  <footer id="footer">
+    <div class="ft-grid">
+
+      <div>
+        <p class="ft-label">Estúdio</p>
+        <h2 class="ft-title">HENRIPSY</h2>
+        <p class="ft-sub">
+          Rua Silva Rabelo 27<br>
+          Sala 305 — Rio de Janeiro
+        </p>
+      </div>
+
+      <div>
+        <p class="ft-label">Contato</p>
+        <p class="ft-sub">
+          @henripsy <br>
+          @aleatoriaartee <br>
+          @betty.tattoo
+        </p>
+      </div>
+
+      <div>
+        <p class="ft-label">Desenvolvido com</p>
+        <div class="ft-tools">
+          <span class="ft-pill">HTML</span>
+          <span class="ft-pill">CSS</span>
+          <span class="ft-pill">JavaScript</span>
+        </div>
+        <p class="ft-sub" style="margin-top:14px;">
+          Criado por<br>
+          <strong class="ft-strong">Arthur Mesquita</strong> <br>
+          <strong class="ft-strong">arthurmesq.gg@gmail.com</strong>
+        </p>
+      </div>
+
+    </div>
+
+    <hr class="ft-divider">
+
+    <div class="ft-bottom">
+      <span class="ft-dev">© 2026 ESTÚDIO DA PRAÇA</span>
+      <div class="ft-icons">
+        <a href="https://www.instagram.com/henripsy/" target="_blank" class="ft-icon" aria-label="Instagram">
+          <img src="insta.png" style="width:20px; filter:brightness(0) invert(1);">
+        </a>
+        <a href="https://www.facebook.com/henripsy" target="_blank" class="ft-icon" aria-label="Facebook">
+          <img src="face.png" style="width:20px; filter:brightness(0) invert(1);">
+        </a>
+      </div>
+    </div>
+  </footer>
+
+
+
+</body>
+
+</html>

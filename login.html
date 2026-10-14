@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <meta name="darkreader-lock">
+  <title>Entrar/Cadastrar</title>
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&display=swap" rel="stylesheet">
+
+  <!-- aplica o tema salvo antes de desenhar a página  -->
+  <script>
+    try {
+      if (localStorage.getItem('tema') === 'dark') {
+        document.documentElement.classList.add('dark');
+      }
+    } catch (e) {}
+  </script>
+  <link rel="stylesheet" href="login.css">
+</head>
+
+<body>
+  <main class="login-page">
+
+    <!-- COLUNA ESQUERDA: formulário -->
+    <section class="login-lado">
+      <div class="login-conteudo">
+
+        <!-- LOGIN -->
+        <form id="form-login" class="login-form" novalidate>
+          <h1 class="login-titulo">Entrar no <br> Estúdio da Praça</h1>
+          <p class="login-sub">Entre para deixar sua avaliação.</p>
+
+          <label class="campo">
+            <input type="email" id="login-email" placeholder="E-mail" autocomplete="email" required>
+          </label>
+
+          <label class="campo">
+            <input type="password" id="login-senha" placeholder="Senha" autocomplete="current-password" required>
+            <button type="button" class="olho" data-alvo="login-senha" aria-label="Mostrar ou ocultar senha">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z" />
+                <circle cx="12" cy="12" r="3" />
+              </svg>
+            </button>
+          </label>
+
+          <button type="button" class="link-btn" id="btn-esqueci">Esqueceu a senha?</button>
+
+          <p class="login-msg" id="login-msg" role="alert"></p>
+
+          <button type="submit" class="btn-principal" id="btn-entrar">Entrar</button>
+
+          <p class="login-rodape-form">
+            Não tem conta?
+            <button type="button" class="link-btn" id="ir-cadastro">Cadastre-se</button>
+          </p>
+        </form>
+
+        <!-- CADASTRO -->
+        <form id="form-cadastro" class="login-form" hidden novalidate>
+          <h1 class="login-titulo">Criar conta</h1>
+          <p class="login-sub">Cadastre-se para deixar sua avaliação.</p>
+
+          <label class="campo">
+            <input type="text" id="cad-nome" placeholder="Seu nome" autocomplete="name" required>
+          </label>
+
+          <label class="campo">
+            <input type="email" id="cad-email" placeholder="E-mail" autocomplete="email" required>
+          </label>
+
+          <label class="campo">
+            <input type="password" id="cad-senha" placeholder="Senha (mín. 6 caracteres)" autocomplete="new-password"
+              required>
+            <button type="button" class="olho" data-alvo="cad-senha" aria-label="Mostrar ou ocultar senha">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z" />
+                <circle cx="12" cy="12" r="3" />
+              </svg>
+            </button>
+          </label>
+
+          <p class="login-msg" id="cad-msg" role="alert"></p>
+
+          <button type="submit" class="btn-principal" id="btn-cadastrar">Cadastrar</button>
+
+          <p class="login-rodape-form">
+            Já tem conta?
+            <button type="button" class="link-btn" id="ir-login">Entrar</button>
+          </p>
+        </form>
+
+      </div>
+
+      <footer class="login-rodape">
+        <a href="index.html" class="voltar">← Voltar ao site</a>
+      </footer>
+    </section>
+
+    <!-- COLUNA DIREITA: grade de imagens inclinada -->
+    <aside class="login-arte" aria-hidden="true">
+      <div class="arte-grade">
+        <img src="trab1.png" alt="">
+        <img src="trab2.png" alt="">
+        <img src="trab3.png" alt="">
+        <img src="trab4.png" alt="">
+        <img src="trab5.png" alt="">
+        <img src="trab6.png" alt="">
+        <img src="trab7.png" alt="">
+        <img src="trab8.png" alt="">
+        <img src="trab9.png" alt="">
+        <img src="trab10.png" alt="">
+        <img src="trab11.png" alt="">
+        <img src="trab12.png" alt="">
+        <img src="trab20.png" alt="">
+        <img src="trab21.png" alt="">
+        <img src="img4.png" alt="">
+        <img src="img5.png" alt="">
+      </div>
+    </aside>
+
+  </main>
+
+  <script src="login.js" type="module"></script>
+</body>
+
+</html>

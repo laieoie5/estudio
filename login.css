@@ -1,0 +1,303 @@
+:root {
+    color-scheme: light;
+    --fundo: #ffffff;
+    --texto: #000000;
+    --texto-suave: #5a5a5a;
+    --campo: #f1f1f1;
+    --campo-borda: #d0d0d0;
+    --destaque: #ffffff;
+    --destaque-hover: #ffffff;
+    --link: #1f6fb2;
+    --erro: #d64541;
+    --ok: #2e9e5b;
+}
+
+:root.dark {
+    color-scheme: dark;
+    --fundo: #161616;
+    --texto: #f0f0f0;
+    --texto-suave: #a8a8a8;
+    --campo: #1d1d1d;
+    --campo-borda: #2a2a2a;
+    --destaque: #222222;
+    --destaque-hover: #1d1d1d;
+    --link: #4aa3e0;
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    height: 100%;
+    margin: 0;
+}
+
+body {
+    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    background: var(--fundo);
+    color: var(--texto);
+}
+
+/* ===== Layout em duas colunas ===== */
+.login-page {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    min-height: 100vh;
+}
+
+/* ===== Coluna do formulário ===== */
+.login-lado {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 40px 24px 24px;
+    background: var(--fundo);
+}
+
+.login-conteudo {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.login-form {
+    width: 100%;
+    max-width: 482px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.login-form[hidden] {
+    display: none;
+}
+
+.login-titulo {
+    margin: 0;
+    font-family: 'UnifrakturMaguntia', serif;
+    font-weight: 400;
+    font-size: clamp(34px, 4vw, 52px);
+    line-height: 1.15;
+    letter-spacing: 1px;
+}
+
+.destaque {
+    color: var(--destaque);
+}
+
+.login-sub {
+    margin: -6px 0 12px;
+    color: var(--texto-suave);
+    font-size: 15px;
+}
+
+/* ===== Campos ===== */
+.campo {
+    position: relative;
+    display: block;
+}
+
+.campo input {
+    width: 100%;
+    height: 58px;
+    padding: 0 52px 0 16px;
+    border: 1px solid var(--campo-borda);
+    border-radius: 6px;
+    background: var(--campo);
+    color: var(--texto);
+    font-size: 15px;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.campo input::placeholder {
+    color: var(--texto-suave);
+}
+
+.campo input:focus {
+    border-color: var(--destaque);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--destaque) 25%, transparent);
+}
+
+.olho {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+    display: flex;
+    padding: 8px;
+    border: none;
+    background: none;
+    color: var(--texto);
+    cursor: pointer;
+    opacity: 0.8;
+}
+
+.olho:hover {
+    opacity: 1;
+}
+
+/* ===== Botões e links ===== */
+.btn-principal {
+    height: 44px;
+    border: none;
+    border-radius: 4px;
+    background: var(--destaque);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.2s, opacity 0.2s;
+}
+
+.btn-principal:hover {
+    background: var(--destaque-hover);
+}
+
+.btn-principal:disabled {
+    opacity: 0.6;
+    cursor: wait;
+}
+
+.link-btn {
+    padding: 0;
+    border: none;
+    background: none;
+    color: var(--link);
+    font: inherit;
+    cursor: pointer;
+}
+
+.link-btn:hover {
+    text-decoration: underline;
+}
+
+#btn-esqueci {
+    align-self: flex-start;
+    font-size: 13px;
+}
+
+.login-rodape-form {
+    margin: 4px 0 0;
+    font-size: 15px;
+    color: var(--texto-suave);
+}
+
+.login-msg {
+    min-height: 20px;
+    margin: 0;
+    font-size: 14px;
+    color: var(--erro);
+}
+
+.login-msg.ok {
+    color: var(--ok);
+}
+
+.login-rodape {
+    text-align: center;
+    font-size: 13px;
+}
+
+.voltar {
+    color: var(--texto-suave);
+    text-decoration: none;
+}
+
+.voltar:hover {
+    color: var(--texto);
+}
+
+/* ===== Coluna da arte (grade inclinada) ===== */
+.login-arte {
+    position: relative;
+    overflow: hidden;
+    background: #0b0b0b;
+}
+
+.arte-grade {
+    position: absolute;
+    inset: -25% -25% -25% -10%;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+    transform: perspective(1400px) rotateY(-22deg) rotateZ(5deg);
+    transform-origin: left center;
+}
+
+.arte-grade img {
+    width: 100%;
+    aspect-ratio: 3 / 4;
+    object-fit: cover;
+    border-radius: 10px;
+}
+
+/* escurece a arte, mais forte perto do formulário */
+.login-arte::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+        linear-gradient(90deg, rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.35)),
+        rgba(0, 0, 0, 0.35);
+    pointer-events: none;
+}
+
+/* ===== respnsivo ===== */
+@media (max-width: 900px) {
+    .login-page {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto 1fr;
+        min-height: 100dvh;
+    }
+ 
+    /* arte em cima do titulo */
+    .login-arte {
+        display: block;
+        order: -1;
+        height: clamp(190px, 36vw, 270px);
+
+        -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 45%, transparent 100%);
+        mask-image: linear-gradient(180deg, #000 0%, #000 45%, transparent 100%);
+    }
+ 
+    /* grade */
+    .arte-grade {
+        inset: -25% -20% -30% -20%;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 10px;
+        transform: perspective(900px) rotateX(16deg) rotateZ(-5deg) scale(1.1);
+        transform-origin: center bottom;
+    }
+ 
+    .arte-grade img {
+        border-radius: 8px;
+    }
+ 
+
+    .login-arte::after {
+        background:
+            linear-gradient(180deg,
+                rgba(0, 0, 0, 0.55) 0%,
+                rgba(0, 0, 0, 0.35) 45%,
+                var(--fundo) 100%);
+    }
+ 
+    .login-lado {
+        padding: 8px 20px 20px;
+    }
+ 
+    .login-conteudo {
+        align-items: flex-start;
+        padding-top: 8px;
+    }
+}
+ 
