@@ -1,7 +1,7 @@
 // ===== FIREBASE SETUP =====
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getFirestore, collection, addDoc, getDocs, doc, deleteDoc, updateDoc, query, orderBy, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, collection, setDoc, getDocs, doc, deleteDoc, updateDoc, query, orderBy, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyATn1yWqgYFj0c_9ShfEN_QFIM0a79LG6E",
@@ -16,9 +16,26 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// ===== SCROLL REVEAL =====
-// Anima qualquer elemento com class="reveal" ao entrar na tela,
+// ===== UTILITÁRIOS =====
 
+// Escapa HTML: todo texto vindo do banco passa por aqui antes de ir para innerHTML
+function esc(valor) {
+    return String(valor ?? '').replace(/[&<>"']/g, (c) => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[c]));
+}
+
+// Garante um número de estrelas válido (0 a 5)
+function estrelasValidas(valor) {
+    const n = Number.parseInt(valor, 10);
+    return Number.isNaN(n) ? 0 : Math.min(5, Math.max(0, n));
+}
+
+const MAX_TEXTO = 1000;
+const MAX_NOME = 60;
+
+// ===== SCROLL REVEAL =====
+// Anima qualquer elemento com class="reveal" ao entrar na tela
 const revealObserver = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
         if (entry.isIntersecting) {
@@ -50,34 +67,28 @@ function ativarReveal(elementos) {
 ativarReveal(document.querySelectorAll('.reveal'));
 
 
-
-// ===== TOGGLE MENU =====
+// ===== MENU ☰ (PC) =====
 const menuBtn = document.getElementById('menu-btn');
 const dropdown = document.getElementById('dropdown');
 
-if (menuBtn) {
-    menuBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        dropdown.classList.toggle('aberto');
-    });
-}
-document.addEventListener('click', () => {
-    if (dropdown) dropdown.classList.remove('aberto');
-    dropdown?.addEventListener('click', (e) => e.stopPropagation());
+menuBtn?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    dropdown?.classList.toggle('aberto');
 });
+// cliques dentro do menu não o fecham (ex.: interruptor de tema)
+dropdown?.addEventListener('click', (e) => e.stopPropagation());
+// clique em qualquer outro lugar fecha
+document.addEventListener('click', () => dropdown?.classList.remove('aberto'));
 
 
-// ===== MOBILE NAVBAR =====
+// ===== NAVBAR MOBILE =====
 const mobileMenuBtn = document.getElementById('mobile-menu-btn');
 const mobileUserBtn = document.getElementById('mobile-user-btn');
 const mobileDrawer = document.getElementById('mobile-drawer');
 const mobileUserDrawer = document.getElementById('mobile-user-drawer');
 const mobileOverlay = document.getElementById('mobile-drawer-overlay');
 const drawerLinks = document.querySelectorAll('.drawer-link');
-const trilhoMobile = document.getElementById('trilho-mobile');
 
-
-// ----- Abrir/fechar gavetas -----
 function fecharTodasGavetas() {
     mobileDrawer?.classList.remove('aberto');
     mobileUserDrawer?.classList.remove('aberto');
@@ -114,16 +125,10 @@ drawerLinks.forEach(link => {
     link.addEventListener('click', fecharTodasGavetas);
 });
 
-// ----- Botões de login/cadastro na gaveta user -----
+// Botões de login/cadastro/sair na gaveta do usuário
 document.getElementById('drawer-ir-login')?.addEventListener('click', () => {
     fecharTodasGavetas();
     location.href = 'login.html';
-});
-
-
-document.getElementById('drawer-sair')?.addEventListener('click', async () => {
-    fecharTodasGavetas();
-    await signOut(auth);
 });
 
 document.getElementById('drawer-ir-cadastro')?.addEventListener('click', () => {
@@ -131,61 +136,91 @@ document.getElementById('drawer-ir-cadastro')?.addEventListener('click', () => {
     location.href = 'login.html#cadastro';
 });
 
+document.getElementById('drawer-sair')?.addEventListener('click', async () => {
+    fecharTodasGavetas();
+    await signOut(auth);
+});
+
+
 // ===== MODO ESCURO / CLARO =====
+// A classe "dark" fica no <html> (igual ao script do <head> e ao style.css)
+const htmlEl = document.documentElement;
 
-function aplicarTema(dark) {
-    document.body.classList.toggle('dark', dark);
-    document.getElementById('trilho')?.classList.toggle('dark', dark);
-    document.getElementById('trilho-mobile')?.classList.toggle('dark', dark);
-    localStorage.setItem('tema', dark ? 'dark' : 'light');
-}
-
-document.getElementById('trilho')?.addEventListener('click', () => {
-    aplicarTema(!document.body.classList.contains('dark'));
-});
-
-document.getElementById('trilho-mobile')?.addEventListener('click', () => {
-    aplicarTema(!document.body.classList.contains('dark'));
-});
-
-// Aplica tema salvo ao carregar
-aplicarTema(localStorage.getItem('tema') === 'dark');
-
-// Aplica tema salvo ao carregar
-aplicarTema(localStorage.getItem('tema') === 'dark');
-
-// ----- Navbar: transparente no topo, com fundo ao rolar -----
-// (só aplica em mobile — a classe .scrolled é adicionada pelo scroll)
-const navbarEl = document.querySelector('.navbar');
-function atualizarNavbarScroll() {
-    if (window.innerWidth <= 768) {
-        navbarEl?.classList.toggle('scrolled', window.scrollY > 10);
-    } else {
-        navbarEl?.classList.remove('scrolled');
+function temaSalvo() {
+    try {
+        return localStorage.getItem('tema');
+    } catch {
+        return null; // localStorage bloqueado (modo privado, etc.)
     }
 }
-window.addEventListener('scroll', atualizarNavbarScroll, { passive: true });
-window.addEventListener('resize', atualizarNavbarScroll);
-atualizarNavbarScroll(); // roda na carga
 
+function aplicarTema(dark) {
+    htmlEl.classList.toggle('dark', dark);
+    document.getElementById('trilho')?.classList.toggle('dark', dark);
+    document.getElementById('trilho-mobile')?.classList.toggle('dark', dark);
+    try {
+        localStorage.setItem('tema', dark ? 'dark' : 'light');
+    } catch { /* ignora */ }
+}
+
+function alternarTema() {
+    aplicarTema(!htmlEl.classList.contains('dark'));
+}
+
+document.getElementById('trilho')?.addEventListener('click', alternarTema);
+document.getElementById('trilho-mobile')?.addEventListener('click', alternarTema);
+
+// Aplica o tema salvo ao carregar (uma única vez)
+aplicarTema(temaSalvo() === 'dark');
+
+
+// ===== NAVBAR: sombra e encolhimento ao rolar =====
+const navbar = document.querySelector('.navbar');
+let tickingNavbar = false;
+
+function atualizarNavbar() {
+    if (!navbar) return;
+    const y = window.scrollY;
+    const mobile = window.innerWidth <= 768;
+    navbar.classList.toggle('shrink', y > 35);
+    navbar.classList.toggle('scrolled', y > (mobile ? 10 : 35));
+}
+
+window.addEventListener('scroll', () => {
+    if (tickingNavbar) return;
+    tickingNavbar = true;
+    requestAnimationFrame(() => {
+        atualizarNavbar();
+        tickingNavbar = false;
+    });
+}, { passive: true });
+
+window.addEventListener('resize', atualizarNavbar);
+atualizarNavbar(); // estado inicial
+
+
+// ===== CARROSSEL COM SWIPE SUAVE =====
 document.addEventListener('DOMContentLoaded', () => {
-
-    // ===== CARROSSEL COM SWIPE SUAVE =====
     let carrosselIndex = 0;
     const slidesEl = document.querySelector('.slides');
     const totalSlides = document.querySelectorAll('.slides img').length;
+    if (!slidesEl || !totalSlides) return;
+
     let carrosselAuto;
     let touchStartX = 0;
     let touchDeltaX = 0;
     let isDraggingCarrossel = false;
 
     const dotsContainer = document.getElementById('carousel-dots');
-    for (let i = 0; i < totalSlides; i++) {
-        const dot = document.createElement('button');
-        dot.classList.add('carousel-dot');
-        if (i === 0) dot.classList.add('ativo');
-        dot.addEventListener('click', () => irParaSlide(i));
-        dotsContainer.appendChild(dot);
+    if (dotsContainer) {
+        for (let i = 0; i < totalSlides; i++) {
+            const dot = document.createElement('button');
+            dot.classList.add('carousel-dot');
+            if (i === 0) dot.classList.add('ativo');
+            dot.setAttribute('aria-label', `Ir para o slide ${i + 1}`);
+            dot.addEventListener('click', () => irParaSlide(i));
+            dotsContainer.appendChild(dot);
+        }
     }
 
     function atualizarDots() {
@@ -216,6 +251,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (carrosselEl) {
         carrosselEl.addEventListener('touchstart', (e) => {
             touchStartX = e.touches[0].clientX;
+            touchDeltaX = 0;
             isDraggingCarrossel = true;
             slidesEl.style.transition = 'none';
         }, { passive: true });
@@ -237,52 +273,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     reiniciarAuto();
-
 }); // fim DOMContentLoaded
 
-
-// ===== NAVBAR =====
-const navbar = document.querySelector(".navbar");
-
-let ultimoEstado = false;
-
-function atualizarNavbar() {
-
-    const scrollado = window.scrollY > 35;
-
-    // Evita ficar adicionando/removendo classes a cada pixel
-    if (scrollado === ultimoEstado) return;
-
-    ultimoEstado = scrollado;
-
-    navbar.classList.toggle("scrolled", scrollado);
-    navbar.classList.toggle("shrink", scrollado);
-}
-
-let ticking = false;
-
-window.addEventListener("scroll", () => {
-
-    if (!ticking) {
-
-        requestAnimationFrame(() => {
-
-            atualizarNavbar();
-            ticking = false;
-
-        });
-
-        ticking = true;
-    }
-
-});
-
-// Estado inicial
-atualizarNavbar();
-
-window.addEventListener("scroll", atualizarNavbar);
-navbar.classList.toggle('shrink', window.scrollY > 50);
-atualizarNavbar();
 
 // ===== LIGHTBOX =====
 const galerias = document.querySelectorAll('.galeria');
@@ -296,14 +288,10 @@ let indexAtual = 0;
 let listaImagens = [];
 let scrollCooldown = false;
 
-// Guarda a galeria dona das imagens abertas (limitador)
-let galeriaAtual = null;
-
 galerias.forEach(galeria => {
     const imgs = galeria.querySelectorAll('img');
     imgs.forEach((img, i) => {
         img.addEventListener('click', () => {
-            galeriaAtual = galeria;
             listaImagens = Array.from(imgs).map(im => im.src);
             indexAtual = i;
             abrirImagem();
@@ -311,7 +299,7 @@ galerias.forEach(galeria => {
     });
 });
 
-// ===== ZOOM + PAN (pc: scroll | mobile: pinça + arrastar) =====
+// ----- Zoom + pan (PC: scroll | celular: pinça + arrastar) -----
 const isTouchDevice = () => window.matchMedia('(hover: none) and (pointer: coarse)').matches;
 
 let scaleAtual = 1;
@@ -355,13 +343,11 @@ function getDistancia(touches) {
 
 if (lightboxImg) {
 
-// ===== SWIPE ENTRE IMAGENS NO CELULAR =====
-
-    // Swipe mobile no lightbox
+    // ----- Swipe entre imagens no celular -----
     let lbTouchStartX = 0, lbTouchDeltaX = 0;
 
     lightbox?.addEventListener('touchstart', (e) => {
-        if (scaleAtual > 1) return; // não swipa se estiver com zoom
+        if (scaleAtual > 1) return; // não faz swipe se estiver com zoom
         lbTouchStartX = e.touches[0].clientX;
         lbTouchDeltaX = 0;
     }, { passive: true });
@@ -384,16 +370,7 @@ if (lightboxImg) {
         lbTouchDeltaX = 0;
     });
 
-    document.addEventListener('keydown', (e) => {
-        if (lightbox?.style.display === 'flex') {
-            if (e.key === 'Escape') fecharImagem();
-            if (e.key === 'ArrowRight') proximaImagem();
-            if (e.key === 'ArrowLeft') imagemAnterior();
-        }
-    });
-
-
-    // ----- SCROLL (pc) -----
+    // ----- Scroll (PC) -----
     lightboxImg.addEventListener('wheel', (e) => {
         if (isTouchDevice()) return;
         e.preventDefault();
@@ -412,13 +389,13 @@ if (lightboxImg) {
         aplicarTransform();
     });
 
-    // ----- DUPLO CLIQUE (pc) -----
+    // ----- Duplo clique (PC) -----
     lightboxImg.addEventListener('dblclick', () => {
         if (isTouchDevice()) return;
         resetarZoom(true);
     });
 
-    // ----- ARRASTAR (pc) -----
+    // ----- Arrastar (PC) -----
     lightboxImg.addEventListener('mousedown', (e) => {
         if (isTouchDevice() || scaleAtual <= 1) return;
         e.preventDefault();
@@ -442,7 +419,7 @@ if (lightboxImg) {
         lightboxImg.style.cursor = scaleAtual > 1 ? 'grab' : 'zoom-in';
     });
 
-    // ----- PINÇA + DUPLO TOQUE + PAN (mobile) -----
+    // ----- Pinça + duplo toque + pan (celular) -----
     let pinchMidX = 0;
     let pinchMidY = 0;
     let panTouchStartX = 0;
@@ -457,7 +434,7 @@ if (lightboxImg) {
             pinchMidY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
             panTouchAtivo = false;
         } else if (e.touches.length === 1) {
-            // Duplo toque
+            // duplo toque
             const agora = Date.now();
             if (agora - lastTapTime < 300 && scaleAtual > 1) {
                 e.preventDefault();
@@ -467,7 +444,7 @@ if (lightboxImg) {
             }
             lastTapTime = agora;
 
-            // Pan com um dedo (só se tiver zoom)
+            // pan com um dedo (só se tiver zoom)
             if (scaleAtual > 1) {
                 e.preventDefault();
                 panTouchAtivo = true;
@@ -516,13 +493,13 @@ if (lightboxImg) {
         }
         if (e.touches.length === 0) {
             panTouchAtivo = false;
-            // Se o scale voltou para 1 ou menos, reseta tudo
+            // se o scale voltou para 1 ou menos, reseta tudo
             if (scaleAtual <= 1) resetarZoom(false);
         }
     });
 }
 
-// ===== ABRIR / FECHAR IMAGEM =====
+// ----- Abrir / fechar imagem -----
 function abrirImagem() {
     destruirPanzoom();
 
@@ -563,9 +540,9 @@ function imagemAnterior() {
     abrirImagem();
 }
 
-if (fechar) fechar.addEventListener('click', fecharImagem);
-if (nextBtn) nextBtn.addEventListener('click', proximaImagem);
-if (prevBtn) prevBtn.addEventListener('click', imagemAnterior);
+fechar?.addEventListener('click', fecharImagem);
+nextBtn?.addEventListener('click', proximaImagem);
+prevBtn?.addEventListener('click', imagemAnterior);
 
 if (lightbox) {
     lightbox.addEventListener('click', (e) => {
@@ -587,6 +564,7 @@ if (lightbox) {
     });
 }
 
+// Teclado (registrado uma única vez)
 document.addEventListener('keydown', (e) => {
     if (lightbox && lightbox.style.display === 'flex') {
         if (e.key === 'Escape') fecharImagem();
@@ -595,13 +573,14 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
+
 // ===== AVALIAÇÕES (FIREBASE) =====
 let usuarioAtual = null;
 let estrelaSelecionada = 5;
 let idxParaExcluir = null;
 let modoAviso = false;
 
-// ----- MODAL DE AVISO -----
+// ----- Modal de aviso / exclusão -----
 function mostrarAviso(mensagem) {
     modoAviso = true;
     document.querySelector('#modal-excluir .modal-texto').textContent = mensagem;
@@ -617,13 +596,10 @@ function fecharModal() {
         document.getElementById('modal-confirmar').style.display = '';
         document.getElementById('modal-cancelar').textContent = 'Cancelar';
         document.querySelector('#modal-excluir .modal-texto').textContent = 'Excluir esta avaliação?';
-        idxParaExcluir = null;
-    } else {
-        idxParaExcluir = null;
     }
+    idxParaExcluir = null;
 }
 
-// ----- BOTÕES DO MODAL -----
 document.getElementById('modal-confirmar').onclick = async () => {
     if (!idxParaExcluir) return;
     try {
@@ -641,10 +617,12 @@ document.getElementById('modal-excluir').addEventListener('click', (e) => {
     if (e.target === document.getElementById('modal-excluir')) fecharModal();
 });
 
-// ----- AUTH STATE -----
+// ----- Estado de login -----
 onAuthStateChanged(auth, (user) => {
     if (user) {
-        usuarioAtual = { uid: user.uid, nome: user.displayName || user.email };
+        // nunca exibe o e-mail completo publicamente
+        const nome = user.displayName || (user.email ? user.email.split('@')[0] : 'Cliente');
+        usuarioAtual = { uid: user.uid, nome };
     } else {
         usuarioAtual = null;
     }
@@ -652,47 +630,51 @@ onAuthStateChanged(auth, (user) => {
     carregarAvaliacoes();
 });
 
-// ----- RENDER AUTH -----
+// ----- Mostra/esconde elementos conforme o login -----
 function renderAuth() {
-    const loginBox = document.getElementById('login-box');
-    const logadoBox = document.getElementById('logado-box');
-    const comentarArea = document.getElementById('comentar-area');
+    const logado = !!usuarioAtual;
 
-    // Itens do menu ☰ (PC)
-    document.getElementById('menu-entrar').style.display = usuarioAtual ? 'none' : 'block';
-    document.getElementById('menu-cadastro').style.display = usuarioAtual ? 'none' : 'block';
-    document.getElementById('menu-sair').style.display = usuarioAtual ? 'block' : 'none';
-    document.getElementById('menu-sair')?.addEventListener('click', async () => {
+    // Menu ☰ (PC)
+    document.getElementById('menu-entrar').style.display = logado ? 'none' : '';
+    document.getElementById('menu-cadastro').style.display = logado ? 'none' : '';
+    document.getElementById('menu-sair').style.display = logado ? '' : 'none';
+
+    // Gaveta do usuário (celular)
+    document.getElementById('drawer-ir-login').style.display = logado ? 'none' : '';
+    document.getElementById('drawer-ir-cadastro').style.display = logado ? 'none' : '';
+    document.getElementById('drawer-sair').style.display = logado ? '' : 'none';
+
+    // Seção de avaliações
+    document.getElementById('login-box').style.display = logado ? 'none' : '';
+    document.getElementById('logado-box').style.display = logado ? '' : 'none';
+    document.getElementById('comentar-area').style.display = logado ? 'block' : 'none';
+
+    if (logado) {
+        document.getElementById('bem-vindo').textContent = `Olá, ${usuarioAtual.nome}! 👋`;
+    }
+}
+
+// ----- Botões de sair (um listener cada, registrado uma única vez) -----
+document.getElementById('menu-sair')?.addEventListener('click', async () => {
     dropdown?.classList.remove('aberto');
     await signOut(auth);
 });
 
-    if (usuarioAtual) {
-        loginBox.style.display = 'none';
-        logadoBox.style.display = 'block';
-        comentarArea.style.display = 'block';
-        document.getElementById('bem-vindo').textContent = `Olá, ${usuarioAtual.nome}! 👋`;
-    } else {
-        loginBox.style.display = 'flex';
-        logadoBox.style.display = 'none';
-        comentarArea.style.display = 'none';
-    }
-}
+document.getElementById('btn-sair')?.addEventListener('click', () => signOut(auth));
 
-
-// ----- ESTRELAS DO FORMULÁRIO -----
+// ----- Estrelas do formulário -----
 document.querySelectorAll('#estrelas-input .estrela-sel').forEach(el => {
     el.addEventListener('click', () => {
-        estrelaSelecionada = parseInt(el.dataset.val);
+        estrelaSelecionada = parseInt(el.dataset.val, 10);
         document.querySelectorAll('#estrelas-input .estrela-sel').forEach((e, i) => {
             e.classList.toggle('ativa', i < estrelaSelecionada);
         });
     });
 });
 
-// ----- ENVIAR AVALIAÇÃO -----
+// ----- Enviar avaliação -----
 document.getElementById('btn-enviar-comentario').onclick = async () => {
-    const texto = document.getElementById('novo-comentario').value.trim();
+    const texto = document.getElementById('novo-comentario').value.trim().slice(0, MAX_TEXTO);
     if (!texto || !usuarioAtual) return;
 
     const btn = document.getElementById('btn-enviar-comentario');
@@ -700,24 +682,26 @@ document.getElementById('btn-enviar-comentario').onclick = async () => {
     btn.textContent = 'Publicando...';
 
     try {
+        // avaliações antigas têm ID aleatório; por isso a checagem por uid continua
         const jaExiste = await getDocs(
             query(collection(db, 'avaliacoes'), where('uid', '==', usuarioAtual.uid))
         );
         if (!jaExiste.empty) {
             mostrarAviso('Você já possui uma avaliação. Edite a existente se quiser alterar.');
-            btn.disabled = false;
-            btn.textContent = 'Publicar avaliação';
             return;
         }
 
-        await addDoc(collection(db, 'avaliacoes'), {
+        // novas avaliações usam o uid como ID do documento: o banco passa a
+        // garantir "uma avaliação por pessoa" (ver firestore.rules)
+        await setDoc(doc(db, 'avaliacoes', usuarioAtual.uid), {
             uid: usuarioAtual.uid,
-            nome: usuarioAtual.nome,
+            nome: usuarioAtual.nome.slice(0, MAX_NOME),
             texto,
-            estrelas: estrelaSelecionada,
+            estrelas: estrelasValidas(estrelaSelecionada) || 5,
             data: new Date().toLocaleDateString('pt-BR'),
             createdAt: serverTimestamp()
         });
+
         document.getElementById('novo-comentario').value = '';
         estrelaSelecionada = 5;
         document.querySelectorAll('#estrelas-input .estrela-sel').forEach((e) => {
@@ -725,14 +709,15 @@ document.getElementById('btn-enviar-comentario').onclick = async () => {
         });
         carregarAvaliacoes();
     } catch (e) {
+        console.error(e);
         mostrarAviso('Erro ao publicar avaliação. Tente novamente.');
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Publicar avaliação';
     }
-
-    btn.disabled = false;
-    btn.textContent = 'Publicar avaliação';
 };
 
-// ----- CARREGAR AVALIAÇÕES DO FIRESTORE -----
+// ----- Carregar avaliações do Firestore -----
 async function carregarAvaliacoes() {
     const lista = document.getElementById('lista-avaliacoes');
     lista.innerHTML = '<p class="sem-avaliacoes">Carregando avaliações...</p>';
@@ -743,17 +728,18 @@ async function carregarAvaliacoes() {
 
         if (snapshot.empty) {
             lista.innerHTML = '<p class="sem-avaliacoes">Nenhuma avaliação ainda. Seja o primeiro!</p>';
+            document.getElementById('resumo-avaliacoes').innerHTML = '';
             return;
         }
 
         lista.innerHTML = '';
 
-        // ----- NOTA MÉDIA -----
+        // ----- Nota média -----
         let totalEstrelas = 0;
         const docs = [];
         snapshot.forEach(docSnap => {
             docs.push(docSnap);
-            totalEstrelas += docSnap.data().estrelas || 0;
+            totalEstrelas += estrelasValidas(docSnap.data().estrelas);
         });
         const media = (totalEstrelas / docs.length).toFixed(1);
         const mediaInteira = Math.round(totalEstrelas / docs.length);
@@ -774,38 +760,39 @@ async function carregarAvaliacoes() {
             const av = docSnap.data();
             const docId = docSnap.id;
             const ehDono = usuarioAtual && usuarioAtual.uid === av.uid;
+            const estrelas = estrelasValidas(av.estrelas);
 
             const item = document.createElement('div');
             item.className = 'avaliacao-item reveal';
             item.id = `av-item-${docId}`;
             item.innerHTML = `
                 <div class="av-header">
-                    <span class="av-nome">${av.nome}</span>
-                    <span class="av-estrelas">${'★'.repeat(av.estrelas)}${'☆'.repeat(5 - av.estrelas)}</span>
-                    <span class="av-data">${av.data}</span>
+                    <span class="av-nome">${esc(av.nome)}</span>
+                    <span class="av-estrelas">${'★'.repeat(estrelas)}${'☆'.repeat(5 - estrelas)}</span>
+                    <span class="av-data">${esc(av.data)}</span>
                     ${ehDono ? `
                     <div class="av-opcoes-container">
-                        <button class="av-opcoes-btn" data-id="${docId}">⋯</button>
-                        <div class="av-menu" id="av-menu-${docId}">
-                            <button data-editar="${docId}">✎ Editar</button>
-                            <button data-excluir="${docId}">🗑 Excluir</button>
+                        <button class="av-opcoes-btn" data-id="${esc(docId)}" aria-label="Opções da avaliação">⋯</button>
+                        <div class="av-menu" id="av-menu-${esc(docId)}">
+                            <button data-editar="${esc(docId)}">✎ Editar</button>
+                            <button data-excluir="${esc(docId)}">🗑 Excluir</button>
                         </div>
                     </div>` : ''}
                 </div>
-                <div id="av-texto-${docId}">
-                    <p class="av-texto">${av.texto}</p>
+                <div id="av-texto-${esc(docId)}">
+                    <p class="av-texto">${esc(av.texto)}</p>
                 </div>
-                <div id="av-edit-${docId}" style="display:none;">
-                    <textarea class="comentario-input av-edit-input" id="av-edit-campo-${docId}">${av.texto}</textarea>
-                    <div class="av-edit-estrelas" id="av-edit-estrelas-${docId}">
+                <div id="av-edit-${esc(docId)}" style="display:none;">
+                    <textarea class="comentario-input av-edit-input" id="av-edit-campo-${esc(docId)}" maxlength="${MAX_TEXTO}">${esc(av.texto)}</textarea>
+                    <div class="av-edit-estrelas" id="av-edit-estrelas-${esc(docId)}">
                         ${[1, 2, 3, 4, 5].map(n => `
-                            <span class="estrela-sel ${n <= av.estrelas ? 'ativa' : ''}"
-                                  data-idx="${docId}" data-val="${n}">★</span>
+                            <span class="estrela-sel ${n <= estrelas ? 'ativa' : ''}"
+                                  data-idx="${esc(docId)}" data-val="${n}">★</span>
                         `).join('')}
                     </div>
                     <div class="auth-btns" style="margin-top:8px;">
-                        <button class="btn-auth" data-salvar="${docId}">Salvar</button>
-                        <button class="btn-auth btn-secondary" data-cancelar="${docId}">Cancelar</button>
+                        <button class="btn-auth" data-salvar="${esc(docId)}">Salvar</button>
+                        <button class="btn-auth btn-secondary" data-cancelar="${esc(docId)}">Cancelar</button>
                     </div>
                 </div>
             `;
@@ -841,7 +828,7 @@ async function carregarAvaliacoes() {
         lista.querySelectorAll('.av-edit-estrelas .estrela-sel').forEach(el => {
             el.addEventListener('click', () => {
                 const idx = el.dataset.idx;
-                const val = parseInt(el.dataset.val);
+                const val = parseInt(el.dataset.val, 10);
                 document.querySelectorAll(`#av-edit-estrelas-${idx} .estrela-sel`).forEach((e, i) => {
                     e.classList.toggle('ativa', i < val);
                 });
@@ -854,13 +841,13 @@ async function carregarAvaliacoes() {
     }
 }
 
-// ----- MENU ⋯ -----
+// ----- Menu ⋯ -----
 function fecharTodosMenus() {
     document.querySelectorAll('.av-menu.aberto').forEach(m => m.classList.remove('aberto'));
 }
 document.addEventListener('click', fecharTodosMenus);
 
-// ----- EDITAR -----
+// ----- Editar -----
 function editarAvaliacao(docId) {
     fecharTodosMenus();
     document.getElementById(`av-texto-${docId}`).style.display = 'none';
@@ -873,23 +860,24 @@ function cancelarEdicao(docId) {
 }
 
 async function salvarEdicao(docId) {
-    const novoTexto = document.getElementById(`av-edit-campo-${docId}`).value.trim();
+    const novoTexto = document.getElementById(`av-edit-campo-${docId}`).value.trim().slice(0, MAX_TEXTO);
     if (!novoTexto) return;
     const estrelasAtivas = document.querySelectorAll(`#av-edit-estrelas-${docId} .estrela-sel.ativa`).length;
 
     try {
         await updateDoc(doc(db, 'avaliacoes', docId), {
             texto: novoTexto,
-            estrelas: estrelasAtivas || 5,
+            estrelas: Math.min(5, Math.max(1, estrelasAtivas || 5)),
             editado: true
         });
         carregarAvaliacoes();
     } catch (e) {
+        console.error(e);
         mostrarAviso('Erro ao salvar edição.');
     }
 }
 
-// ----- EXCLUIR (modal) -----
+// ----- Excluir (modal) -----
 function excluirAvaliacao(docId) {
     fecharTodosMenus();
     idxParaExcluir = docId;
