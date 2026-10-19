@@ -89,12 +89,34 @@
       <circle cx="17.5" cy="6.5" r="1.1" fill="currentColor" />
     </symbol>
  
-    <!-- losango    ❖  -->
+    <!-- losango ❖  -->
     <symbol id="ic-losango" viewBox="0 0 12 12">
       <path d="M6 1l5 5-5 5-5-5z" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round" />
       <circle cx="6" cy="6" r="1.2" fill="currentColor" />
     </symbol>
  
+    <!-- estrela título avaliações ⛧ -->
+    <symbol id="ic-estrela" viewBox="0 0 24 24">
+      <path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"
+        d="M12 21L6.71 4.72 20.56 14.78 3.44 14.78 17.29 4.72Z" />
+    </symbol>
+    
+    <!-- seta botão Google Maps -->
+    <symbol id="ic-seta" viewBox="0 0 24 24">
+      <path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"
+        d="M7 17L17 7M8 7h9v9" />
+    </symbol>
+
+    <!-- portal em arco conheça o espaço -->
+    <symbol id="ic-porta" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 21V10a8 8 0 0 1 16 0v11" />
+        <path d="M8.5 21v-8.5a3.5 3.5 0 0 1 7 0V21" />
+        <path d="M2 21h20" />
+      </g>
+      <circle cx="13.6" cy="17" r="0.8" fill="currentColor" />
+    </symbol>
+
   </defs>
 </svg>
 
@@ -106,7 +128,8 @@
   </script>
 
 
-<!-- CORPO DO SITE -->
+
+<!------------------------ CORPO DO SITE ------------------------>
 
 
 <nav class="navbar">
@@ -260,13 +283,19 @@
   <div class="container">
     <div class="card" id="localizacao">
       <section>
-        <h1 class="loc-h1">- Conheça o Espaço -</h1>
+
+        <h1 class="loc-h1 loc-titulo reveal">
+          <svg class="ic ic-porta" aria-hidden="true"><use href="#ic-porta" /></svg>
+          Conheça o Espaço
+          <svg class="ic ic-porta" aria-hidden="true"><use href="#ic-porta" /></svg>
+        </h1>
+
         <h1 class="loc-h2">Conheça <br> o Espaço</h1>
  
         <div class="esp-divisor reveal" aria-hidden="true"><span>❖</span></div>
  
         <p class="tat-p esp-intro reveal">Um ambiente pensado pra sua experiência, do primeiro esboço à última hachura,
-          confira as imagens:</p>
+          confira as imagens</p>
  
         <div class="esp-grid">
  
@@ -294,7 +323,7 @@
           <div class="esp-card reveal">
             <div class="esp-foto">
               <img src="fachada.jpeg" loading="lazy" alt="Fachada do estúdio">
-              <span class="esp-selo">Sala 305</span>
+              <span class="esp-selo">Rio de Janeiro, RJ</span>
             </div>
  
             <div class="esp-corpo"> <br><br>
@@ -303,9 +332,9 @@
                 Rua Silva Rabelo, 27 — Sala 305<br>
                         Rio de Janeiro, RJ
               </address>
-              <a href="https://maps.google.com/?q=Rua+Silva+Rabelo+27+Rio+de+Janeiro" target="_blank"
-                rel="noopener" class="instagram-btn esp-btn">
-                GOOGLE MAPS
+              <a href="https://maps.google.com/?q=Rua+Silva+Rabelo+27+Rio+de+Janeiro" target="_blank" rel="noopener"
+                class="instagram-btn esp-btn">
+                <svg class="ic" aria-hidden="true"><use href="#ic-seta" /></svg>Google Maps
               </a>
             </div>
           </div>
@@ -346,7 +375,7 @@
  
       <div class="tat-capa">
         <!-- foto de capa -->
-        <img src="henripsy.png" loading="lazy" alt="Tatuagem de henripsy">
+        <img src="henripsy.png" loading="lazy" alt="Imagem de henripsy">
         <h2 class="tat-nome"><svg class="ic" aria-hidden="true"><use href="#ic-cruz" /></svg>henripsy</h2>
       </div>
  
@@ -488,8 +517,8 @@
   <div class="container container-pequeno">
     <div class="card" id="recentes">
       <section>
-        <h1 class="trabre-h1">-Trabalhos Recentes-</h1> <br>
-        <div class="galeria">
+        <h1 class="trabre-h1">Trabalhos Recentes</h1> <br>
+        <div class="tab-galeria">
           <img src="img7.png" loading="lazy" class="reveal">
           <img src="img6.png" loading="lazy" class="reveal">
           <img src="img12.png" loading="lazy" class="reveal">
@@ -533,7 +562,13 @@
   <div class="container">
     <div class="card" id="avaliacoes">
       <section>
-        <h1 class="ava-h1">⛧𝓐valiações⛧</h1>
+
+        <h1 class="ava-h1 ava-titulo">
+          <svg class="ic ic-estrela" aria-hidden="true"><use href="#ic-estrela" /></svg>
+          Avaliações
+          <svg class="ic ic-estrela" aria-hidden="true"><use href="#ic-estrela" /></svg>
+        </h1>
+
         <h3>-O que nossos clientes dizem-</h3>
         <div id="resumo-avaliacoes"></div>
 
